@@ -44,7 +44,7 @@ import LLTSolver as LLT
 
 def matrnr():
     # set your matriculation number here
-    matrnr = 0
+    matrnr = 23062789
     return matrnr
 
 
@@ -56,14 +56,27 @@ def PrecCGSolver(A: np.array, b: np.array, delta=1.0e-6, verbose=0):
     countIter = 0
 
     L = IC.incompleteCholesky(A)
-    x = LLT.LLTSolver(L, b)
+    x_j = LLT.LLTSolver(L, b)
+    
+    r = (A @ x_j) - b
+    d = -LLT.LLTSolver(L, r)
 
-    while MISSING STATEMENT:
-        MISSING CODE
+    while np.linalg.norm(r) > delta:
+        # MISSING CODE
+        d_temp = A @ d
+        rho = d.T @ d_temp
+        t = (r.T @ LLT.LLTSolver(L, r)) / rho
+        x_j = x_j + t @ d
+        r_old = r
+        r = r_old + t @ d_temp
+        beta = (r.T @ LLT.LLTSolver(L, r)) / (r_old.T @ LLT.LLTSolver(L, r_old))
+        d = -LLT.LLTSolver(L, r) + beta @ d
         countIter = countIter + 1
         if verbose:
             print('STEP ', countIter, ': norm of residual is ', np.linalg.norm(r))
-
+    
+    x = x_j
+    
     if verbose:
         print('precCGSolver terminated after ', countIter, ' steps with norm of residual being ', np.linalg.norm(r))
 
