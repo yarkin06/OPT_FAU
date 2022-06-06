@@ -66,11 +66,11 @@ def PrecCGSolver(A: np.array, b: np.array, delta=1.0e-6, verbose=0):
         d_temp = A @ d
         rho = d.T @ d_temp
         t = (r.T @ LLT.LLTSolver(L, r)) / rho
-        x_j = x_j + t @ d
+        x_j = x_j + t * d
         r_old = r
-        r = r_old + t @ d_temp
+        r = r_old + t * d_temp
         beta = (r.T @ LLT.LLTSolver(L, r)) / (r_old.T @ LLT.LLTSolver(L, r_old))
-        d = -LLT.LLTSolver(L, r) + beta @ d
+        d = -LLT.LLTSolver(L, r) + beta * d
         countIter = countIter + 1
         if verbose:
             print('STEP ', countIter, ': norm of residual is ', np.linalg.norm(r))
