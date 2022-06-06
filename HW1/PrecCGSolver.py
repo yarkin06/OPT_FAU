@@ -75,7 +75,7 @@ def PrecCGSolver(A: np.array, b: np.array, delta=1.0e-6, verbose=0):
         if verbose:
             print('STEP ', countIter, ': norm of residual is ', np.linalg.norm(r))
     
-    x = x_j
+    x = np.copy(x_j)
     
     if verbose:
         print('precCGSolver terminated after ', countIter, ' steps with norm of residual being ', np.linalg.norm(r))
