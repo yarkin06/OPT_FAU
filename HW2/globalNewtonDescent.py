@@ -73,15 +73,17 @@ def globalNewtonDescent(f, x0: np.array, eps=1.0e-3, verbose=0):
         Bk = hessx
         dk = PCG.PrecCGSolver(Bk,xk)
         descent = gradx.T @ dk
-        print(dk)
+        # print(dk)
         if descent >= 0:
             print("girdi")
             dk = -gradx
-        print(descent)
+        # print(descent)
         tk = WP.WolfePowellSearch(f,xk,dk)
         xk = xk + tk*dk
         hessx = f.hessian(xk)
-        Bk = hessx
+        gradx = f.gradient(xk)
+        print("linalg",np.linalg.norm(gradx))
+        # Bk = hessx
 
         countIter = countIter + 1
     

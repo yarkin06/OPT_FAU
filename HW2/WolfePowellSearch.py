@@ -137,18 +137,21 @@ def WolfePowellSearch(f, x: np.array, d: np.array, sigma=1.0e-3, rho=1.0e-2, ver
     descentxd = gradxd.T @ d
     W2 = descentxd >= (rho*descent)
     while W2 == False:
-        print("4")
+        # print("4")
         t = (t_min + t_pl)/2
         fxd = f.objective(x + t*d)
         W1 = fxd <= (fx + t*sigma*descent)
         gradxd = f.gradient(x + t*d)
         descentxd = gradxd.T @ d
         W2 = descentxd >= (rho*descent)
+        # print("descentxd",descentxd)
+        # print("sağ",rho*descent)
+        # print("t",t)
         if W1 == True:
             t_min = t
         else:
             t_pl = t
-        print(t_min)
+        # print(t_min)
     t_star = t_min
 
     t = np.copy(t_star)
