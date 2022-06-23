@@ -49,7 +49,7 @@ import PrecCGSolver as PCG
 
 def matrnr():
     # set your matriculation number here
-    matrnr = 0
+    matrnr = 23062789
     return matrnr
 
 
@@ -62,14 +62,30 @@ def globalNewtonDescent(f, x0: np.array, eps=1.0e-3, verbose=0):
         print('Start globalNewtonDescent...')
 
     countIter = 0
-    x = MISSING
+    xk = x0
     
+    gradx = f.gradient(xk)
+    hessx = f.hessian(xk)
 
-    while MISSING STATEMENT:
-        MISSING CODE
+    while np.linalg.norm(gradx) > eps:
+        print("tur")
+        # MISSING CODE
+        Bk = hessx
+        dk = PCG.PrecCGSolver(Bk,xk)
+        descent = gradx.T @ dk
+        print(dk)
+        if descent >= 0:
+            print("girdi")
+            dk = -gradx
+        print(descent)
+        tk = WP.WolfePowellSearch(f,xk,dk)
+        xk = xk + tk*dk
+        hessx = f.hessian(xk)
+        Bk = hessx
 
         countIter = countIter + 1
     
+    x = np.copy(xk)
 
     if verbose:
         gradx = f.gradient(x)
