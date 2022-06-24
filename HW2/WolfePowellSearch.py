@@ -68,7 +68,7 @@ def WolfePowellSearch(f, x: np.array, d: np.array, sigma=1.0e-3, rho=1.0e-2, ver
     fx = f.objective(x)
     gradx = f.gradient(x)
     descent = gradx.T @ d
-    print("wp",descent)
+    # print("wp",descent)
 
     if descent >= 0:
         raise TypeError('descent direction check failed!')
@@ -83,29 +83,29 @@ def WolfePowellSearch(f, x: np.array, d: np.array, sigma=1.0e-3, rho=1.0e-2, ver
         print('Start WolfePowellSearch...')
 
     t = 1
+    def update(t):
+        fx = f.objective(x)
+        gradx = f.gradient(x)
+        descent = gradx.T @ d
+
+        fxd = f.objective(x + t*d)
+        gradxd = f.gradient(x + t*d)
+        descentxd = gradxd.T @ d
+
+        W1 = fxd <= (fx + t*sigma*descent)
+        W2 = descentxd >= (rho*descent)
+
+        return W1, W2
 
     # MISSING CODE
 
-    fxd = f.objective(x + t*d)
-    gradxd = f.gradient(x + t*d)
-    descentxd = gradxd.T @ d
-
-    W1 = fxd <= (fx + t*sigma*descent)
-    W2 = descentxd >= (rho*descent)
+    W1, W2 = update(t)
     if W1 == False:
         t = t/2
-        fxd = f.objective(x + t*d)
-        W1 = fxd <= (fx + t*sigma*descent)
-        gradxd = f.gradient(x + t*d)
-        descentxd = gradxd.T @ d
-        W2 = descentxd >= (rho*descent)
+        W1, W2 = update(t)
         while W1 == False:
             t = t/2
-            fxd = f.objective(x + t*d)
-            W1 = fxd <= (fx + t*sigma*descent)
-            gradxd = f.gradient(x + t*d)
-            descentxd = gradxd.T @ d
-            W2 = descentxd >= (rho*descent)
+            W1, W2 = update(t)
         t_min = t
         t_pl = 2*t
     
@@ -115,43 +115,22 @@ def WolfePowellSearch(f, x: np.array, d: np.array, sigma=1.0e-3, rho=1.0e-2, ver
 
     else:
         t = 2*t
-        fxd = f.objective(x + t*d)
-        W1 = fxd <= (fx + t*sigma*descent)
-        gradxd = f.gradient(x + t*d)
-        descentxd = gradxd.T @ d
-        W2 = descentxd >= (rho*descent)
+        W1, W2 = update(t)
         while W1 == True:
             t = 2*t
-            fxd = f.objective(x + t*d)
-            W1 = fxd <= (fx + t*sigma*descent)
-            gradxd = f.gradient(x + t*d)
-            descentxd = gradxd.T @ d
-            W2 = descentxd >= (rho*descent)
+            W1, W2 = update(t)
         t_min = t/2
         t_pl = t
     
     t = t_min
-    fxd = f.objective(x + t*d)
-    W1 = fxd <= (fx + t*sigma*descent)
-    gradxd = f.gradient(x + t*d)
-    descentxd = gradxd.T @ d
-    W2 = descentxd >= (rho*descent)
+    W1, W2 = update(t)
     while W2 == False:
-        # print("4")
         t = (t_min + t_pl)/2
-        fxd = f.objective(x + t*d)
-        W1 = fxd <= (fx + t*sigma*descent)
-        gradxd = f.gradient(x + t*d)
-        descentxd = gradxd.T @ d
-        W2 = descentxd >= (rho*descent)
-        # print("descentxd",descentxd)
-        # print("sağ",rho*descent)
-        # print("t",t)
+        W1, W2 = update(t)
         if W1 == True:
             t_min = t
         else:
             t_pl = t
-        # print(t_min)
     t_star = t_min
 
     t = np.copy(t_star)

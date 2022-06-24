@@ -64,26 +64,24 @@ def globalNewtonDescent(f, x0: np.array, eps=1.0e-3, verbose=0):
     countIter = 0
     xk = x0
     
-    gradx = f.gradient(xk)
-    hessx = f.hessian(xk)
+    def update(xk):
+        gradx = f.gradient(xk)
+        hessx = f.hessian(xk)
+        gradnormx = np.linalg.norm(gradx)
+        return gradx, hessx, gradnormx
 
-    while np.linalg.norm(gradx) > eps:
-        print("tur")
+    gradx, hessx, gradnormx = update(xk)
+    while gradnormx > eps:
         # MISSING CODE
         Bk = hessx
-        dk = PCG.PrecCGSolver(Bk,xk)
+        dk = PCG.PrecCGSolver(Bk,-gradx)
         descent = gradx.T @ dk
-        # print(dk)
         if descent >= 0:
-            print("girdi")
             dk = -gradx
-        # print(descent)
         tk = WP.WolfePowellSearch(f,xk,dk)
         xk = xk + tk*dk
-        hessx = f.hessian(xk)
-        gradx = f.gradient(xk)
-        print("linalg",np.linalg.norm(gradx))
-        # Bk = hessx
+        gradx, hessx, gradnormx = update(xk)
+        Bk = hessx
 
         countIter = countIter + 1
     
