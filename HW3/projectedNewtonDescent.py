@@ -66,7 +66,7 @@ import PrecCGSolver as PCG
 
 def matrnr():
     # set your matriculation number here
-    matrnr = 0
+    matrnr = 23062789
     return matrnr
 
 
@@ -78,10 +78,32 @@ def projectedNewtonDescent(f, P, x0: np.array, eps=1.0e-3, verbose=0):
         print('Start projectedNewtonDescent...')
 
     countIter = 0
-    xp = MISSING
+    xp = P.project(x0)
 
-    while MISSING STATEMENT:
-        MISSING CODE
+    def update(xk, P, f):
+        gradx = f.gradient(xk)
+        hessx = f.hessian(xk)
+        gradnormx = np.linalg.norm(xk - P.project(xk - gradx))
+        return gradx, hessx, gradnormx
+
+    gradx, hessx, gradnormx = update(xp, P, f)
+
+   
+    while gradnormx > eps:
+        Bk = hessx
+        L = P.activeIndexSet(xp)
+        Bk[L,:] = 0
+        Bk[:,L] = 0
+        Bk[L,L] = 1
+        dk = PCG.PrecCGSolver(Bk, -gradx)
+        descent = gradx.T @ dk
+        if descent > 0:
+            dk = -gradx
+        tk = PB.projectedBacktrackingSearch(f, P, xp, dk)
+
+        xp = P.project(xp + tk * dk)
+        gradx, hessx, gradnormx = update(xp, P, f)
+        Bk = hessx
 
         countIter = countIter + 1
 
@@ -89,4 +111,5 @@ def projectedNewtonDescent(f, P, x0: np.array, eps=1.0e-3, verbose=0):
     if verbose:
         print('globalNewtonDescent terminated after ', countIter, ' steps')
 
-    return xp
+    x = np.copy(xp)
+    return x

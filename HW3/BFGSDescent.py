@@ -47,7 +47,7 @@ import WolfePowellSearch as WP
 
 def matrnr():
     # set your matriculation number here
-    matrnr = 0
+    matrnr = 23062789
     return matrnr
 
 
@@ -60,11 +60,32 @@ def BFGSDescent(f, x0: np.array, eps=1.0e-3, verbose=0):
 
     countIter = 0
 
-    x = MISSING
-    B = MISSING
+    x = x0
+    B = np.eye(x.shape[0])
+    def update(xk):
+        gradx = f.gradient(xk)
+        gradnormx = np.linalg.norm(gradx)
+        return gradx, gradnormx
 
-    while MISSING STATEMENT:
-        MISSING CODE
+    gradx, gradnormx = update(x)
+    while gradnormx > eps:
+        dk = -np.dot(B, gradx)
+        descent = gradx.T @ dk
+        if descent > 0:
+            dk = -gradx
+            B = np.eye(x.shape[0])
+        t = WP.WolfePowellSearch(f, x, dk)
+        ex = x.copy()
+        ex_grad = gradx.copy()
+        x = x + t*dk
+        gradx, gradnormx = update(x)
+        dg = gradx - ex_grad
+        dx = x - ex
+        
+        rk = dx - (B @ dg)
+        B += ((rk @ dx.T) + (dx @ rk.T)) / (dg.T @ dx)
+        B -= (rk.T @ dg) * (dx @ dx.T) / ((dg.T @ dx) @ (dg.T @ dx))
+        countIter += 1
 
     if verbose:
         gradx = f.gradient(x)
