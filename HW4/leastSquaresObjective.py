@@ -41,7 +41,7 @@ import numpy as np
 
 def matrnr():
     # set your matriculation number here
-    matrnr = 0
+    matrnr = 23062789
     return matrnr
 
 
@@ -58,7 +58,13 @@ class leastSquaresObjective:
         self.model.setParameters(p)
         myResidual = np.zeros((self.N, 1))
 
-        MISSING CODE
+        for i in range(self.N):
+            # value, gradx, gradp = self.model(self.xData[:, i].reshape((self.n, 1)), p)
+            value = self.model.objective(self.xData[:, i].reshape((self.n, 1)))
+            myResidual[i] = value - self.fData[:, i]
+        
+        # myResidual = myResidual.reshape((self.N,))
+        # myResidual = myResidual.T
 
         return myResidual
 
@@ -66,6 +72,10 @@ class leastSquaresObjective:
         self.model.setParameters(p)
         myJacobian = np.zeros((self.N, p.shape[0]))
 
-        MISSING CODE
+        for i in range(self.N):
+            # value, gradx, gradp = self.model(self.xData[:, i].reshape((self.n, 1)), p)
+            gradp = self.model.parameterGradient(self.xData[:, i].reshape((self.n, 1)))
+            # myJacobian[i, :] = gradp.reshape((1, p.shape[0]))
+            myJacobian[i, :] = gradp.T
 
         return myJacobian
