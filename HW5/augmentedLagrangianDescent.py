@@ -64,7 +64,7 @@ import augmentedLagrangianObjective as AO
 
 def matrnr():
     # set your matriculation number here
-    matrnr = 0
+    matrnr = 23062789
     return matrnr
 
 
@@ -79,17 +79,42 @@ def augmentedLagrangianDescent(f, P, h, x0: np.array, alpha0=0, eps=1.0e-3, delt
         print('Start augmentedLagrangianDescent...')
 
     countIter = 0
-    xp = MISSING
-    alphak =  MISSING
+    xk = P.project(x0)
+    hk = h.objective(xk)
+    alphak = alpha0
+    gammak = 10
+    epsk = 1 / gammak
+    deltak = epsk**0.1
+    Ak = AO.augmentedLagrangianObjective(f, h, alphak, gammak)
+    # Ak_obj = Ak.objective(xk)
+    Ak_grad = Ak.gradient(xk)
 
 
-    while MISSING STATEMENT:
-        MISSING CODE
-
+    while np.linalg.norm(xk - P.project(xk-Ak_grad)) > eps or np.linalg.norm(hk) > delta:
+        xmin = PD.projectedNewtonDescent(Ak, P, xk, epsk)
+        xk = xmin
+        # Ak_obj = Ak.objective(xk)
+        Ak_grad = Ak.gradient(xk)
+        hk = h.objective(xk)
+        if np.linalg.norm(hk) <= deltak:
+            alphak = alphak + gammak*h.objective(xk)
+            epsk = max(epsk/gammak,eps)
+            deltak = max(deltak/gammak**0.9,delta)
+        else:
+            gammak = max(10,np.sqrt(gammak))*gammak
+            epsk = 1/gammak
+            deltak = epsk**0.1
+        
+        Ak = AO.augmentedLagrangianObjective(f, h, alphak, gammak)
+        # Ak_obj = Ak.objective(xk)
+        Ak_grad = Ak.gradient(xk)
+    
         countIter = countIter + 1
 
+    xp = xk
+    alphap = alphak
 
     if verbose:
-        print('augmentedLagrangianDescent terminated after ', countIter, ' steps)
+        print('augmentedLagrangianDescent terminated after ', countIter, ' steps')
 
-    return [xp, alphak]
+    return [xp, alphap]
